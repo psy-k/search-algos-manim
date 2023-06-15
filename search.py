@@ -1,9 +1,18 @@
 from manim import *
+from collections import deque
 from searchGraphData import cities, positions, adjLists, labelDirections
 
-cityIconCenterColor = "#f6edd5"
-cityIconBorderColor = "#72472c"
+discoveredCityIconCenterColor = "#c7cbbb"
+discoveredCityIconBorderColor= "#7e8a87"
+
+visitedCityIconCenterColor = "#f6edd5"
+visitedCityIconBorderColor = "#72472c"
+
+targetCityIconCenterColor = "#ffefaf"
+targetCityIconBorderColor = "#ffce00"
+
 dashedEdgeColor = "#b02222"
+dashedEdgeColorGreyed = "#7e8a87"
 dotRadius = 0.05
 
 color1 = RED
@@ -19,7 +28,7 @@ class City:
         # self.adjListDist = adjListDist
         self.mobject = mobject
 
-class Search(ZoomedScene):
+class SearchBFS(ZoomedScene):
     def construct(self):
         map = ImageMobject("../maps/Laileia_noCityIcons.png")
         mapPin = ImageMobject("../maps/mapPin.png")
@@ -32,14 +41,13 @@ class Search(ZoomedScene):
             mapCities[city] = Dot(
                                 radius=dotRadius, 
                                 point=positions[city], 
-                                color=cityIconCenterColor, 
+                                color=discoveredCityIconCenterColor, 
                                 stroke_width=1, 
-                                stroke_color=cityIconBorderColor
+                                stroke_color=discoveredCityIconBorderColor
                             )
             cityLabels[city] = Tex(city.upper(), color=BLACK).next_to(
                                     mapCities[city], labelDirections[city]).scale(0.3)
             
-            print((labelDirections[city] is UP  or (labelDirections[city] is DOWN)))
             if (labelDirections[city] is UP) or (labelDirections[city] is DOWN):
                 cityLabels[city].shift(labelDirections[city]*-1*0.3)
             else:
@@ -56,12 +64,18 @@ class Search(ZoomedScene):
 
 
         self.add(map, mapPin)
-
-        edgesRecords = {}
+        
         edges = {}
+        greyedEdges = {}
         for city in cities:
             for neighbour in adjLists[city]:
-                if ~(city+neighbour in edges) or edgesRecords[city+neighbour] is None:
+                if city+neighbour not in edges.keys():
+                    greyedEdges[city+neighbour] = DashedLine(
+                        mapCities[city].get_center(), 
+                        mapCities[neighbour].get_center(), 
+                        color=dashedEdgeColorGreyed,
+                        stroke_width = 0.5
+                    )
                     edges[city+neighbour] = DashedLine(
                         mapCities[city].get_center(), 
                         mapCities[neighbour].get_center(), 
@@ -69,49 +83,134 @@ class Search(ZoomedScene):
                         stroke_width = 0.5
                     )
                     edges[neighbour+city] = edges[city+neighbour]
-                    self.add(edges[city+neighbour])
+                    greyedEdges[neighbour+city] = greyedEdges[city+neighbour]
+
+                    edges[city+neighbour].set_z_index(greyedEdges[city+neighbour].z_index+1)
+                    
                     mapCities[city].set_z_index(edges[city+neighbour].z_index+1)
                     mapCities[neighbour].set_z_index(edges[city+neighbour].z_index+1)
+
+                    self.add(greyedEdges[city+neighbour])
             self.add(mapCities[city], cityLabels[city])
 
 
-        self.camera.frame.scale(0.5).shift(LEFT*2+UP*0.5)
+        self.camera.frame.scale(0.5).shift(LEFT*3+UP*0.5)
+
+        startInfo = Tex("Start: S", color = BLACK).scale(0.3).shift(LEFT*5.8+UP*2)
+        destInfo = Tex("To Reach: T", color = BLACK).scale(0.3).next_to(startInfo, DOWN).shift(RIGHT*0.15+UP*0.15)
+
+        self.add(startInfo, destInfo)
 
 
 
         
-
-        # s = Dot(radius = dotRadius, point=LEFT*4.6+UP*1.47, color=cityIconCenterColor,stroke_width=1, stroke_color=cityIconBorderColor)
+        #-----------BFS----------------
+        # what a shame lmao
+        start = 's'
+        target = 't'
         
-        # a = Dot(radius = dotRadius, point=LEFT*3.55+UP*1.9, color=color2)
-        # b = Dot(radius = dotRadius, point=LEFT*3.85+UP*1.3, color=color2)
-        # c = Dot(radius = dotRadius, point=LEFT*3.9+UP*0.6, color=color2)
+        mapCities[start].stroke_color = visitedCityIconBorderColor
+        mapCities[start].fill_color = visitedCityIconCenterColor
+
+        mapCities[target].stroke_color = targetCityIconBorderColor
+        mapCities[target].fill_color = targetCityIconCenterColor
+
+        visited = []
+        discovered = deque()
+        curr = start
+
+        prev = []
+        discovered += adjLists[curr]
+        visited.append(curr)
+        mapPin.set_z_index(mapCities['q'].z_index + 1)
+        mapPin.move_to(mapCities[start].get_center()+UP*0.1)
+
+
+
+
+        
+        self.wait()
+
+        parent = {}
+        parent['s'] = None
+
+        pinScale = 1
+        offset = UP*0.07
+
+        visitOrder = ['s', 'a', 's', 'b', 's', 'c', 's', 'a', 'h', 'a', 'e', 't']
         
 
-        # d = Dot(radius = dotRadius, point=LEFT*2.8+UP*1.4, color=color3)
-        # e = Dot(radius = dotRadius, point=LEFT*3.25+UP*0.85, color=color3)
+        for i in range(1, len(visitOrder)):
+            if visitOrder[i] not in visited:
+                visited.append(visitOrder[i])
+                if pinScale == 1:
+                    self.play(mapPin.animate.scale(0.8).shift(DOWN*0.03), run_time = 0.5)
+                    pinScale = 0.5
+                # else:
+                #     pinScale = 1
+
+                self.play(LaggedStart( *[mapPin.animate.move_to(mapCities[visitOrder[i]].get_center()+offset), 
+                                            Create(edges[visitOrder[i-1]+visitOrder[i]])] 
+                                        ,lag_ratio=0.2))
+                
+                if i == len(visitOrder)-1:
+                    self.play(
+                        mapPin.animate.scale(1/0.8).shift(UP*0.03), 
+                        # mapCities[visitOrder[i]].
+                        #     animate.set_stroke_color(visitedCityIconBorderColor).
+                        #     set_fill_color(visitedCityIconCenterColor),
+                        run_time = 0.5
+                    )
+                else:
+                    self.play(
+                        # mapPin.animate.scale(2).shift(UP*0.05), 
+                        mapCities[visitOrder[i]].
+                            animate.
+                            # set_stroke_color(visitedCityIconBorderColor).
+                            set_fill_color(visitedCityIconCenterColor),
+                        run_time = 0.5
+                    )
+
+                # self.wait()
+            else:
+                if pinScale == 1:
+                    self.play(mapPin.animate.scale(0.5), run_time = 0.5)
+                    pinScale = 0.5
+
+                self.play(mapPin.animate.move_to(mapCities[visitOrder[i]].get_center()+offset))
+                # self.wait()
+
+        self.wait(2)
+        finalPathColor =  BLUE #"#4ca95e" # "#ffd633" # "#fe4e00" # "#e9190f" # "#09a129" # "#f08700" # "#499f68" 
+        prev = ['s', 'a', 'e']
+        finalPath = []
+        for i in range(1, len(prev)):
+            finalPath.append(
+                Line(
+                    start = mapCities[prev[i-1]].get_center(),
+                    end = mapCities[prev[i]].get_center(),
+                    color = finalPathColor,
+                    stroke_width = 16,
+                )
+            )
+            
+            finalPath[i-1].set_z_index(mapCities[prev[i-1]].z_index+1)
+            finalPath[i-1].set_opacity(0.5).scale(1.2)
+            
+            self.play(Create(finalPath[i-1]))
+
+        finalPath.append(
+                Line(
+                    start = mapCities[prev[-1]].get_center(),
+                    end = mapCities[target].get_center(),
+                    color = finalPathColor,
+                    stroke_width = 16,
+                )
+            )
+            
+        finalPath[-1].set_z_index(mapCities[prev[i-1]].z_index+1)
+        finalPath[-1].set_opacity(0.5).scale(1.2)
+        mapPin.set_z_index(finalPath[-1].z_index+1)
         
-        # f = Dot(radius = dotRadius, point=LEFT*2.6+UP*0.45, color=color3)
-        # g = Dot(radius = dotRadius, point=LEFT*3.15+UP*0.2, color=color3)
-        # h = Dot(radius = dotRadius, point=LEFT*3.7+DOWN*0.2, color=color3)
-        
-
-        # i = Dot(radius = dotRadius, point=LEFT*2.4+UP*2, color=color4)
-        # j = Dot(radius = dotRadius, point=LEFT*1.55+UP*1.2, color=color4)
-        
-        # k = Dot(radius = dotRadius, point=LEFT*2.4+UP*0.9, color=color4)
-
-        # l = Dot(radius = dotRadius, point=LEFT*1.45+UP*0.6, color=color4)
-        # m = Dot(radius = dotRadius, point=LEFT*1+UP*0.1, color=color4)
-        # n = Dot(radius = dotRadius, point=LEFT*1.6+UP*0, color=color4)   
-        # o = Dot(radius = dotRadius, point=LEFT*2+DOWN*0.3, color=color4)
-
-        # p = Dot(radius = dotRadius, point=LEFT*2.7+DOWN*0.35, color=color4)
-        # q = Dot(radius = dotRadius, point=LEFT*3.2+DOWN*0.5, color=color4)
-
-        # r = Dot(radius = dotRadius, point=LEFT*3.9+DOWN*0.7, color=color4)
-        # t = Dot(radius = dotRadius, point=LEFT*3.2+DOWN*1.2, color=color4)
-
-        # self.add(map, s, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t)
-        
-
+        self.play(Create(finalPath[-1]))
+        self.wait(2)
