@@ -1,7 +1,20 @@
 from manim import *
+from collections import deque
+from dijkstrasData import cities, positions, labelDirections, adjLists
+import json, random
+from overlappingAnims import *
 
-colorCityIconCenter = "#f6edd5"
-colorCityIconBorder = "#72472c"
+discoveredCityIconCenterColor = "#c7cbbb"
+discoveredCityIconBorderColor= "#7e8a87"
+
+visitedCityIconCenterColor = "#f6edd5"
+visitedCityIconBorderColor = "#72472c"
+
+targetCityIconCenterColor = "#ffefaf"
+targetCityIconBorderColor = "#ffce00"
+
+dashedEdgeColor = "#b02222"
+dashedEdgeColorGreyed = "#7e8a87"
 dotRadius = 0.05
 
 color1 = RED
@@ -10,50 +23,58 @@ color3 = GREEN
 color4 = PINK
 
 
-class City:
-    def __init__(self, name, adjList, adjListDist, mobject):
-        self.name = name
-        self.adjList = adjList
-        self.adjListDist = adjListDist
-        self.mobject = mobject
-
-class Dijkstras(MovingCameraScene):
+class DijkstrasLogic(ZoomedScene):
     def construct(self):
-        map = ImageMobject("../maps/Laileia_noCityIcons.png")
+        map = ImageMobject("../maps/dijkstrasMap.png")
+        # map = ImageMobject("../maps/Laileia_noCityIcons.png")
+        mapPin = ImageMobject("../maps/mapPin.png")
         map.scale(0.2).shift(UP*0.2)
+        mapPin.scale(0.01)
 
-        s = Dot(radius = dotRadius, point=LEFT*4.6+UP*1.47, color=color1)
+        number_plane = NumberPlane(
+            background_line_style={
+                "stroke_color": TEAL,
+                "stroke_width": 4,
+                "stroke_opacity": 0.6
+            }
+        )
+
+        self.add(map)
+
+        self.add(number_plane, mapPin)
+
+        mapCities = {}
+        citiesGroup = VGroup()
+        for city in cities:
+            mapCities[city] = Dot(
+                                radius=dotRadius, 
+                                point=positions[city], 
+                                color=visitedCityIconCenterColor, 
+                                stroke_width=1, 
+                                stroke_color=discoveredCityIconBorderColor
+                            )
+            # self.add(mapCities[city])
+
         
-        a = Dot(radius = dotRadius, point=LEFT*3.5+UP*1.34, color=color2)
-        b = Dot(radius = dotRadius, point=LEFT*3.9+UP*1.1, color=color2)
         
+        edges = {}
+        edgesGroup = VGroup()
+        for i in range(len(positions)):
+            city = cities[i]
+            for neighbour in adjLists[city]:
+                if city+neighbour not in edges.keys():
+                    edges[city+neighbour] = DashedLine(
+                        mapCities[city].get_center(), 
+                        mapCities[neighbour].get_center(), 
+                        color=dashedEdgeColor,
+                        stroke_width = 0.5
+                    )
+                    edges[neighbour+city] = edges[city+neighbour]                    
+                    mapCities[city].set_z_index(edges[city+neighbour].z_index+1)
+                    mapCities[neighbour].set_z_index(edges[city+neighbour].z_index+1)
 
-        c = Dot(radius = dotRadius, point=LEFT*3.3+UP*0.7, color=color3)
-        d = Dot(radius = dotRadius, point=LEFT*3.9+UP*0.3, color=color3)
-        e = Dot(radius = dotRadius, point=LEFT*2.8+UP*1.4, color=color3)
+                    # self.add(edges[str(city)+str(neighbour)])
+
+
+
         
-        f = Dot(radius = dotRadius, point=LEFT*2.6+UP*0.8, color=color3)
-        # g = Dot(radius = dotRadius, point=LEFT*3.15+UP*0.2, color=color3)
-        # h = Dot(radius = dotRadius, point=LEFT*3.7+DOWN*0.2, color=color3)
-        
-
-        i = Dot(radius = dotRadius, point=LEFT*2.4+UP*2, color=color4)
-        j = Dot(radius = dotRadius, point=LEFT*1.7+UP*1.35, color=color4)
-        
-        k = Dot(radius = dotRadius, point=LEFT*2.1+UP*1, color=color4)
-
-        l = Dot(radius = dotRadius, point=LEFT*1.45+UP*0.6, color=color4)
-        m = Dot(radius = dotRadius, point=LEFT*2.05+UP*0.3, color=color4)
-        n = Dot(radius = dotRadius, point=LEFT*2.6+UP*0, color=color4)   
-        # o = Dot(radius = dotRadius, point=LEFT*2+DOWN*0.3, color=color4)
-
-        p = Dot(radius = dotRadius, point=LEFT*3.15+UP*0.1, color=color4)
-        q = Dot(radius = dotRadius, point=LEFT*3.2+DOWN*0.5, color=color4)
-
-        r = Dot(radius = dotRadius, point=LEFT*3.9+DOWN*0.7, color=color4)
-        # t = Dot(radius = dotRadius, point=LEFT*3.2+DOWN*1.2, color=color4)
-
-        # self.add(map, s, a, b, c, d, e, i, j, k)
-        # self.add(map, s, a, b, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t)
-        self.add(map, s, a, b, c, d, e, f, i, j, k, l, m, n, p, q, r, s)
-
