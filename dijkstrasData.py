@@ -1,76 +1,145 @@
 from manim import *
 
 cities = [            
-    "s", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l",
-    "m", "n", "o", "p", "r", "q", "t"
+    "s", "b", "a", "c", "d", "e", "f", "g", "h", 
+    "i", "j", "k", "l",
+    "m", "n", "o", "p",
+    # "r", "q", 
+    "t"
     ]
 
 positions = {
-    "s": LEFT*4.6+UP*1.47,
-    "c": LEFT*3.55+UP*1.9, #dfs
-    "b": LEFT*3.85+UP*1.3,
-    "a": LEFT*3.9+UP*0.6, #dfs
-    "d": LEFT*2.8+UP*1.4,
-    "g": LEFT*3.25+UP*0.85, #dfs-2
-    "f": LEFT*2.6+UP*0.45,
-    "e": LEFT*3.15+UP*0.2, #dfs-2
-    "h": LEFT*3.7+DOWN*0.2,
-    "i": LEFT*2.4+UP*2,
-    "j": LEFT*1.55+UP*1.2,
-    "k": LEFT*2.4+UP*0.9,
-    "l": LEFT*1.45+UP*0.6,
-    "m": LEFT*1+UP*0.1,
-    "n": LEFT*1.6+UP*0,
-    "o": LEFT*2+DOWN*0.3,
-    "p": LEFT*2.7+DOWN*0.35,
-    "t": LEFT*3.2+DOWN*0.5, #dfs-3
-    "r": LEFT*3.9+DOWN*0.7,
-    "q": LEFT*3.2+DOWN*1.2, #dfs-3
+    "s": LEFT*3.75+UP*1.1,
+    "a": LEFT*2.23+UP*1.32, 
+    "b": LEFT*2.93+UP*0.85,
+    "c": LEFT*3.45+UP*-0.02, 
+    "d": LEFT*2.5+UP*0.02,
+    "e": LEFT*1.3+UP*0.95, 
+    "f": LEFT*1.75+UP*0.35,
+    "g": LEFT*2.0+UP*-0.47,
+    "h": LEFT*3.0+UP*-1.0,
+    "i": LEFT*0.15+UP*1.25,
+    "j": LEFT*0.6+UP*0.25,
+    "k": LEFT*1.0+UP*-0.15,
+    "l": LEFT*1.75+UP*-1.2,
+    "m": LEFT*2.85+UP*-1.75,
+    "n": LEFT*-0.1+UP*0.6,
+    "o": LEFT*-0.0+UP*-0.4,
+    "p": LEFT*-0.5+UP*-0.05,
+    # "q": LEFT*4.1+UP*1.3,
+    # "r": LEFT*3.85+UP*1.6,
+    "t": LEFT*-0.93+UP*0.47,
 }
 
 labelDirections = {
-    "s": LEFT,
-    "c": LEFT, #dfs
+    "s": RIGHT+UP,
+    "a": RIGHT+UP,
     "b": DOWN,
-    "a": LEFT, #dfs
+    "c": LEFT, 
     "d": DOWN,
-    "g": LEFT, #dfs-2
-    "f": UP,
-    "e": LEFT, #dfs-2
+    "e": RIGHT+UP, 
+    "f": LEFT,
+    "g": RIGHT, 
     "h": LEFT,
-    "i": LEFT,
+    "i": RIGHT+UP,
     "j": RIGHT,
-    "k": UP,
+    "k": DOWN,
     "l": RIGHT,
     "m": DOWN,
-    "n": DOWN,
+    "n": LEFT+UP,
     "o": LEFT,
     "p": DOWN,
-    "t": DOWN, #dfs-3
-    "r": LEFT,
-    "q": LEFT, #dfs-3
+    # "q": LEFT, 
+    # "r": LEFT,
+    "t": RIGHT, 
 }
 
 adjLists = {
-    "s": ["a", "b", "c"],
-    "c": ["b", "g", "s"], #dfs-1
-    "b": ["c", "d", "g", "s"],
-    "a": [ "h", "e", "f", "s"], #dfs-1
-    "d": ["b", "i", "j", "k"],
-    "g": ["a", "b", "k"], #dfs-2
-    "f": ["a", "l", "m", "n", "o"],
-    "e": [ "t", "a", "k", "p"], #dfs-2
-    "h": ["a", "r", "q"],
-    "i": ["d"],
-    "j": ["d", "k"],
-    "k": ["e", "e", "l", "d", "j"],
-    "l": ["k", "f"],
-    "m": ["f", "n"],
-    "n": ["m", "f"],
-    "o": ["f"],
-    "p": ["e"], 
-    "t": [ "e"], #dfs-3
-    "r": ["h"],
-    "q": ["h"] #dfs-3
+    # "s": ["a", "b", "r", "q"],
+    "s": ["a", "b"],
+    "a": ["b", "e", "f", "s"],
+    "b": [ "c", "d", "a", "s"],
+    "c": ["b", "d", "h"], 
+    "d": ["b", "c", "g", "k"],
+    "e": ["a", "j"],
+    "f": ["a", "j", "k", "o"],
+    "g": [ "d", "l", "m"], 
+    "h": ["c"],
+    "i": ["n"],
+    "j": ["e", "f", "n", "o"],
+    "k": ["d", "f"],
+    "l": ["g"],
+    "m": ["g"],
+    "n": ["i", "j", "p", "t"],
+    "o": ["f", "j"],
+    "p": ["n", "t"], 
+    # "q": [ "s"], 
+    # "r": ["s"],
+    "t": ["n", "p"] 
+}
+
+pathWeights = {
+    # "s": [4, 2, 1, 1],
+    "s": [4, 2],
+    "a": [1, 4, 8, 4], 
+    "b": [5, 6, 1, 2],
+    "c": [5, 2, 7], 
+    "d": [6, 2, 3, 10],
+    "e": [4, 4],
+    "f": [8, 5, 3, 9],
+    "g": [3, 2, 10], 
+    "h": [7],
+    "i": [3],
+    "j": [4, 5, 4, 8],
+    "k": [10, 3],
+    "l": [2],
+    "m": [10],
+    "n": [3, 4, 1, 2],
+    "o": [9, 8],
+    "p": [1, 2], 
+    # "q": [1], 
+    # "r": [1],
+    "t": [2, 2] 
+}
+
+weightDirections = {
+    # "s": [UP, DOWN, RIGHT+UP, LEFT+DOWN],
+    "s": [UP, DOWN],
+    "a": [DOWN+RIGHT, UP+RIGHT, LEFT, UP], 
+    "b": [DOWN+RIGHT, LEFT, RIGHT, DOWN],
+    "c": [LEFT, DOWN, LEFT], 
+    "d": [RIGHT, DOWN, LEFT+DOWN, DOWN],
+    "e": [RIGHT+UP, RIGHT+UP],
+    "f": [LEFT, UP, LEFT+DOWN, UP+RIGHT],
+    "g": [LEFT, RIGHT, RIGHT+DOWN], 
+    "h": [LEFT],
+    "i": [LEFT],
+    "j": [RIGHT+UP, UP, LEFT+UP, RIGHT],
+    "k": [DOWN, RIGHT+UP],
+    "l": [RIGHT],
+    "m": [RIGHT+DOWN],
+    "n": [LEFT, UP, DOWN+LEFT, UP],
+    "o": [DOWN+LEFT, RIGHT],
+    "p": [DOWN+LEFT, RIGHT], 
+    # "q": [LEFT+DOWN], 
+    # "r": [RIGHT],
+    "t": [UP, RIGHT] 
+}
+
+pathToCity = {
+    'b' : ['b'],
+    'a' : ['a'],
+    "c" : ['b', 'c'],
+    "e" : ['b', 'a', 'e'],
+    "d" : ['a', 'b', 'd'],
+    "f" : ['b', 'a', 'f'],
+    "j" : ['a', 'e', 'j'],
+    "g" : ['e', 'a', 'b', 'd', 'g'],
+    "l" : ['l'],
+    "h" : ['g', 'd', 'b', 'c', 'h'],
+    "k" : ['c', 'b', 'a', 'f', 'k'],
+    "n" : ['f', 'a', 'e', 'j', 'n'],
+    "p" : ['p'],
+    "t" : ['n', 't'],
 }
 
