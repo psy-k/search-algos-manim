@@ -7,15 +7,10 @@ from pathKey import *
 import json, random
 from overlappingAnims import *
 
-color1 = RED
-color2 = BLUE
-color3 = GREEN
-color4 = PINK
-
 UPDATE = "update"
 ADD = "add"
 
-class DijkstrasIntro(ZoomedScene):
+class DijkstrasIntroP1(ZoomedScene):
 
     def construct(self):
         map = ImageMobject("../maps/Laileia_noCityIcons.png")
@@ -257,6 +252,8 @@ class DijkstrasIntro(ZoomedScene):
                 LaggedStart(
                     GrowFromCenter( weights['sb'], rate_func = rate_functions.ease_out_back,),
                     GrowFromCenter( weights['ba'], rate_func = rate_functions.ease_out_back,),
+                    GrowFromCenter( greyedWeights['sb'], rate_func = rate_functions.ease_out_back,),
+                    GrowFromCenter( greyedWeights['ba'], rate_func = rate_functions.ease_out_back,),
                     GrowFromCenter( greyedWeights['sa'],rate_func = rate_functions.ease_out_back,),
                     GrowFromCenter( greyedWeights['bc'], rate_func = rate_functions.ease_out_back,),
                     GrowFromCenter( greyedWeights['bd'], rate_func = rate_functions.ease_out_back,),
@@ -295,8 +292,8 @@ class DijkstrasIntro(ZoomedScene):
             ShrinkToCenter(cityNamesMobjects['c'], rate_func = rate_functions.ease_in_back), 
             ShrinkToCenter(cityDistanceMobjects['c'], rate_func = rate_functions.ease_in_back)
         )
-        cityNamesMobjects['c'] = Text("C", color=textColor).scale(textScale).shift(UP*(0.70-3*0.3) + LEFT*0.5 + visitedOffset),
-        cityDistanceMobjects['c'] = Text("7", color=textColor).scale(textScale).shift(UP*(0.70-3*0.3) + RIGHT*0.5 + visitedOffset),
+        cityNamesMobjects['c'] = Text("C", color=textColor).scale(textScale).shift(UP*(0.70-3*0.3) + LEFT*0.5 + visitedOffset)
+        cityDistanceMobjects['c'] = Text("7", color=textColor).scale(textScale).shift(UP*(0.70-3*0.3) + RIGHT*0.5 + visitedOffset)
         self.play(
             GrowFromCenter(cityNamesMobjects['c'], rate_func = rate_functions.ease_out_back), 
             GrowFromCenter(cityDistanceMobjects['c'], rate_func = rate_functions.ease_out_back)
@@ -318,7 +315,64 @@ class DijkstrasIntro(ZoomedScene):
             )
         )
         self.wait()
+
+        prev = ['s', 'b', 'c']
+        finalPath = []
+        for i in range(len(prev)-1):
+            finalPath.append(
+                Line(
+                    start = mapCities[prev[i]].get_center(),
+                    end = mapCities[prev[i+1]].get_center(),
+                    color = BLUE,
+                    stroke_width = 16,
+                )
+            )
+            
+            finalPath[i].set_z_index(mapCities[prev[i]].z_index+1)
+            finalPath[i].set_opacity(0.5).scale(1.2)
+            mapPin.set_z_index(finalPath[i].z_index+1)
+            
+            self.play(Create(finalPath[i]))
         
+        # self.wait()
+        shortestPathText = Paragraph(
+            "Shortest Path",
+            "to C",
+            "FOR SURE", 
+            color = BLUE,
+            alignment = "center",
+        ).scale(0.2).move_to(mapCities['b'].get_center() + LEFT*0.75 + DOWN*0.25)
         
+        self.play(FadeIn(shortestPathText[:2]))
+        self.wait()
+        self.play(FadeIn(shortestPathText[2]))
+        self.wait()
+
+        self.wait(2)
+        clearAnims = [
+            Uncreate(finalPath[0]),
+            Uncreate(finalPath[1]),
+            mapPin.animate.move_to(mapCities['s'].get_center() + UP*0.1),
+            Uncreate(edges['sb']),
+            Uncreate(edges['bc']),
+            Uncreate(edges['ba']),
+            Uncreate(weights['sb']),
+            Uncreate(weights['bc']),
+            Uncreate(weights['ba']),
+            mapCities['b'].animate.set_fill_color(discoveredCityIconCenterColor),
+            mapCities['a'].animate.set_fill_color(discoveredCityIconCenterColor),
+            mapCities['c'].animate.set_fill_color(discoveredCityIconCenterColor),
+            FadeOut(shortestPathText)
+        ]
+
+        self.play(*clearAnims)
+        self.wait()
+
+        self.play(
+            LaggedStart(
+                GrowFromCenter(mapCities['j'], rate_func = rate_functions.ease_out_back),
+                GrowFromCenter(mapCities['j'], rate_func = rate_functions.ease_out_back),
+            )
+        )
         
         self.wait(2)

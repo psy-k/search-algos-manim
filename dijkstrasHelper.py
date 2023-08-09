@@ -12,17 +12,20 @@ targetCityIconBorderColor = "#ffce00"
 
 dashedEdgeColor = "#b02222"
 dashedEdgeColorGreyed = "#7e8a87"
-dashedEdgeColorEstimated = PURE_GREEN
+dashedEdgeColorEstimated = BLUE
 dotRadius = 0.05
 
 
-def getDijkstrasMapCitiesAndLabels():
+def getDijkstrasMapCitiesAndLabels(altPositions=None):
     mapCities = {}
     cityLabels = {}
+    positionsToUse = positions
+    if altPositions != None:
+        positionsToUse = altPositions
     for city in cities:
         mapCities[city] = Dot(
                             radius=dotRadius, 
-                            point=positions[city], 
+                            point=positionsToUse[city], 
                             color=discoveredCityIconCenterColor, 
                             stroke_width=1, 
                             stroke_color=discoveredCityIconBorderColor
@@ -134,3 +137,86 @@ def getMovePinToCityAnims(cityInUppercase, mapCities, mapPinMobject):
         )
     
     return anims
+
+
+def getAltEdgesAndWeights(mapCities):
+    edges = {}
+    greyedEdges = {}
+    estimatedShortestPathEdges ={}
+
+    pathWeightsDict = {}
+    weights = {}
+    estimatedShortestPathWeights ={}
+    greyedWeights = {}
+    for i in range(len(cities)):
+        city = cities[i]
+        for j in range(len(adjLists[city])):
+            neighbour = adjLists[city][j]
+            if city+neighbour not in edges.keys():
+                greyedEdges[city+neighbour] = DashedLine(
+                    mapCities[city].get_center(), 
+                    mapCities[neighbour].get_center(), 
+                    color=dashedEdgeColorGreyed,
+                    stroke_width = 0.5
+                )
+                estimatedShortestPathEdges[city+neighbour] = DashedLine(
+                    mapCities[city].get_center(), 
+                    mapCities[neighbour].get_center(), 
+                    color=dashedEdgeColorEstimated,
+                    stroke_width = 0.5
+                )
+                edges[city+neighbour] = DashedLine(
+                    mapCities[city].get_center(), 
+                    mapCities[neighbour].get_center(), 
+                    color=dashedEdgeColor,
+                    stroke_width = 0.5
+                )
+
+                offset = 0.08
+                pathWeightsDict[city+neighbour] = pathWeights[city][j]
+                greyedWeights[city+neighbour] = Tex(
+                                                    str(pathWeights[city][j]), 
+                                                    color = dashedEdgeColorGreyed
+                                                ).scale(0.3).move_to(
+                                                    greyedEdges[city+neighbour].get_center() + weightDirections[city][j]*offset)
+                weights[city+neighbour] = Tex(
+                                                str(pathWeights[city][j]), 
+                                                color = dashedEdgeColor
+                                            ).scale(0.3).move_to(
+                                                greyedEdges[city+neighbour].get_center() + weightDirections[city][j]*offset)
+                estimatedShortestPathWeights[city+neighbour] = Tex(
+                                                str(pathWeights[city][j]), 
+                                                color = dashedEdgeColorEstimated
+                                            ).scale(0.3).move_to(
+                                                greyedEdges[city+neighbour].get_center() + weightDirections[city][j]*offset)
+                
+                edges[neighbour+city] = edges[city+neighbour]
+                greyedEdges[neighbour+city] = greyedEdges[city+neighbour]
+                estimatedShortestPathEdges[neighbour+city] = estimatedShortestPathEdges[city+neighbour]
+
+                weights[neighbour+city] = weights[city+neighbour]
+                greyedWeights[neighbour+city] = greyedWeights[city+neighbour]
+                estimatedShortestPathWeights[neighbour+city] = estimatedShortestPathWeights[city+neighbour]
+                
+                pathWeightsDict[neighbour+city] = pathWeightsDict[city+neighbour]
+
+                estimatedShortestPathEdges[city+neighbour].set_z_index(greyedEdges[city+neighbour].z_index+1)
+                edges[city+neighbour].set_z_index(estimatedShortestPathEdges[city+neighbour].z_index+1)
+
+                estimatedShortestPathWeights[city+neighbour].set_z_index(greyedWeights[city+neighbour].z_index+1)
+                weights[city+neighbour].set_z_index(estimatedShortestPathWeights[city+neighbour].z_index+1)
+                
+                mapCities[city].set_z_index(edges[city+neighbour].z_index+1)
+                mapCities[neighbour].set_z_index(edges[city+neighbour].z_index+1)
+
+                # self.add(greyedEdges[city+neighbour], weights[city+neighbour])
+
+    return (
+        edges, 
+        greyedEdges, 
+        estimatedShortestPathEdges, 
+        pathWeightsDict, 
+        weights, 
+        estimatedShortestPathWeights,
+        greyedWeights
+    )

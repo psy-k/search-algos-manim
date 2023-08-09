@@ -7,11 +7,6 @@ from pathKey import *
 import json, random
 from overlappingAnims import *
 
-color1 = RED
-color2 = BLUE
-color3 = GREEN
-color4 = PINK
-
 UPDATE = "update"
 ADD = "add"
 
@@ -85,7 +80,7 @@ class DijkstrasLogic(ZoomedScene):
             UP*2.5 + LEFT*6.2
         )
         estimatedShortestPath = PathKey(
-            GREEN, "Estimated Shortest Path",
+            BLUE, "Estimated Shortest Path",
             UP*2.2 + LEFT*6.2
         )
 
@@ -192,6 +187,14 @@ class DijkstrasLogic(ZoomedScene):
             if len(neighbouringAnims) > 0:
                 self.play(*neighbouringAnims)
                 self.wait()
+
+            if nextCity.name.lower() == 'b':
+                self.play(ScaleInPlace(greyedWeights['bc'], 1.5, rate_func = rate_functions.there_and_back))
+                self.wait()
+                self.play(ScaleInPlace(visitedList.cityDistanceMobjects[1], 1.5, rate_func = rate_functions.there_and_back))
+                self.wait()
+
+                
             
             for i in range(len(neighbours)):
                 if actions[i] == ADD:
@@ -344,7 +347,7 @@ class DijkstrasLogic(ZoomedScene):
         # visitNextCity()
 
         while visitedCity != target:
-        # for i in range(4):
+        # for i in range(2):
             visitedCity = visitNextCity().lower()
             self.wait()
 

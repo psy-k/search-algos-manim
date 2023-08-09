@@ -243,7 +243,7 @@ class InfoList:
             if self.cities[i].name == cityName:
                 
                 oldDistanceMobject = self.cityDistanceMobjects[i]
-                nameMobjectCopy = self.cityNameMobjects[i]
+                nameMobjectCopy = self.cityNameMobjects[i].copy()
 
                 
                 anims = [

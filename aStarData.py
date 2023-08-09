@@ -4,7 +4,7 @@ cities = [
     "s", "b", "a", "c", "d", "e", "f", "g", "h", 
     "i", "j", "k", "l",
     "m", "n", "o", "p",
-    # "r", "q", 
+    "r", "q", 
     "t"
     ]
 
@@ -26,8 +26,8 @@ positions = {
     "n": LEFT*-0.1+UP*0.6,
     "o": LEFT*-0.0+UP*-0.4,
     "p": LEFT*-0.5+UP*-0.05,
-    # "q": LEFT*4.1+UP*1.3,
-    # "r": LEFT*3.85+UP*1.6,
+    "q": LEFT*4.1+UP*1.3,
+    "r": LEFT*3.85+UP*1.6,
     "t": LEFT*-0.93+UP*0.47,
 }
 
@@ -49,14 +49,14 @@ labelDirections = {
     "n": LEFT+UP,
     "o": LEFT,
     "p": DOWN,
-    # "q": LEFT, 
-    # "r": LEFT,
+    "q": LEFT, 
+    "r": LEFT,
     "t": RIGHT, 
 }
 
 adjLists = {
-    # "s": ["a", "b", "r", "q"],
-    "s": ["a", "b"],
+    "s": ["a", "b", "r", "q"],
+    # "s": ["a", "b"],
     "a": ["b", "e", "f", "s"],
     "b": [ "c", "d", "a", "s"],
     "c": ["b", "d", "h"], 
@@ -79,8 +79,8 @@ adjLists = {
 }
 
 pathWeights = {
-    # "s": [4, 2, 1, 1],
-    "s": [4, 2],
+    "s": [4, 2, 1, 1],
+    # "s": [4, 2],
     "a": [1, 4, 8, 4], 
     "b": [5, 6, 1, 2],
     "c": [5, 2, 7], 
@@ -99,14 +99,14 @@ pathWeights = {
     "n": [3, 4, 1, 2],
     "o": [9, 8],
     "p": [1, 2], 
-    # "q": [1], 
-    # "r": [1],
+    "q": [1], 
+    "r": [1],
     "t": [2, 2] 
 }
 
 weightDirections = {
-    # "s": [UP, DOWN, RIGHT+UP, LEFT+DOWN],
-    "s": [UP, DOWN],
+    "s": [UP, DOWN, RIGHT+UP, LEFT+DOWN],
+    # "s": [UP, DOWN],
     "a": [DOWN+RIGHT, UP+RIGHT, LEFT, UP], 
     "b": [DOWN+RIGHT, LEFT, RIGHT, DOWN],
     "c": [LEFT, DOWN, LEFT], 
@@ -123,25 +123,8 @@ weightDirections = {
     "n": [LEFT, UP, DOWN+LEFT, UP],
     "o": [LEFT+DOWN, RIGHT],
     "p": [DOWN+LEFT, RIGHT], 
-    # "q": [LEFT+DOWN], 
-    # "r": [RIGHT],
+    "q": [LEFT+DOWN], 
+    "r": [RIGHT],
     "t": [UP, RIGHT] 
-}
-
-pathToCity = {
-    'b' : ['b'],
-    'a' : ['a'],
-    "c" : ['b', 'c'],
-    "e" : ['b', 'a', 'e'],
-    "d" : ['a', 'b', 'd'],
-    "f" : ['b', 'a', 'f'],
-    "j" : ['a', 'e', 'j'],
-    "g" : ['e', 'a', 'b', 'd', 'g'],
-    "l" : ['l'],
-    "h" : ['g', 'd', 'b', 'c', 'h'],
-    "k" : ['c', 'b', 'a', 'f', 'k'],
-    "n" : ['f', 'a', 'e', 'j', 'n'],
-    "p" : ['p'],
-    "t" : ['n', 't'],
 }
 
