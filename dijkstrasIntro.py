@@ -10,7 +10,7 @@ from overlappingAnims import *
 UPDATE = "update"
 ADD = "add"
 
-class DijkstrasIntroP1(ZoomedScene):
+class DijkstrasIntroP1_C(ZoomedScene):
 
     def construct(self):
         map = ImageMobject("../maps/Laileia_noCityIcons.png")
@@ -189,11 +189,14 @@ class DijkstrasIntroP1(ZoomedScene):
         visitedList.heading.set_opacity(1)
         discoveredList.heading.set_opacity(1)
 
-        self.play(Write(discoveredList.heading))
         self.wait()
+
+        self.play(Write(discoveredList.heading),
+        #           )
+        # self.wait()
         
 
-        self.play(
+        # self.play(
             LaggedStart(
                 LaggedStart(*addCititesAnims, lag_ratio=0.15), 
                 AnimationGroup(*createEdgesAnims),
@@ -207,9 +210,10 @@ class DijkstrasIntroP1(ZoomedScene):
 
         
         self.wait()
-        self.play(Write(visitedList.heading))
-        self.wait()
-        self.play(
+        self.play(Write(visitedList.heading),
+        #           )
+        # self.wait()
+        # self.play(
             LaggedStart(
                 AnimationGroup(
                     mapCities['s'].animate.set_fill_color(visitedCityIconCenterColor),

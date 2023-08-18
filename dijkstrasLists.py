@@ -7,6 +7,7 @@ textScale = 0.25
 listLimit = 7
 ZOOM = "zoom"
 FADEIN = "fadein"
+KEEP_ORIGINAL = 'animFlag'
 
 class ListCity:
     def __init__(self, name, parent, distance):
@@ -154,7 +155,7 @@ class InfoList:
         if not onNewCityAdded:
             anims += [
                 FadeIn(compareSign),
-                None,
+                # None,
             ]
         
         if compareSignText == "<":
@@ -173,9 +174,9 @@ class InfoList:
             anims += [FadeOut(compareSign), self.cityDistanceMobjects[cityIndex].animate.shift(RIGHT*0.35)]
         else:
             if onNewCityAdded:
-                anims += [FadeOut(tempNewDist), None]
+                anims += [FadeOut(tempNewDist), KEEP_ORIGINAL]
             else:
-                anims += [FadeOut(compareSign, tempNewDist), None]
+                anims += [FadeOut(compareSign, tempNewDist), KEEP_ORIGINAL]
                 
         
         return anims
@@ -261,7 +262,7 @@ class InfoList:
 
                 anims += distAsSumAnims[:-2]
 
-                if distAsSumAnims[-1] == None:
+                if distAsSumAnims[-1] == KEEP_ORIGINAL:
                     anims.append(distAsSumAnims[-2])
                 else:
                     anims.append(AnimationGroup(FadeOut(oldDistanceMobject), distAsSumAnims[-2]))
@@ -275,6 +276,7 @@ class InfoList:
         myList[j] = temp 
 
     def sortList(self):
+        originalOrder = [i for i in range(len(self.cities))]
         order = [i for i in range(len(self.cities))]
         
         for i in range(len(self.cities)):
@@ -288,11 +290,19 @@ class InfoList:
                     self.swap(self.cityVGroups3, j, j+1)
                     self.swap(order, j, j+1)
         
-        anims = [
-            AnimationGroup(
-                *[self.cityVGroups2[i].animate.shift(DOWN*(i-order[i])*0.3) for i in range(len(self.cities))]
-            )
-        ]
+        change = False
+        for i in range(len(order)):
+            if originalOrder[i] != order[i]:
+                change = True
+                break
+        if change:
+            anims = [
+                AnimationGroup(
+                    *[self.cityVGroups2[i].animate.shift(DOWN*(i-order[i])*0.3) for i in range(len(self.cities))]
+                )
+            ]
+        else:
+            anims = []
 
         return anims
                     

@@ -15,12 +15,15 @@ visitedCities = [
     "s", "b", "a", "c", "d", "e", "f", "g", 
     "h", "j", "k", "l", "n", "p", "t"
 ]
-onScreenGreyEdges = ['sa', 'cd', 'fj', 'dk', 'oj', 'pt']
+onScreenGreyEdges = ['sa']#, 'cd', 'fj', 'dk', 'oj', 'pt']
 onScreenEdges = [
-    'sb', 'ba', 'bc', 'bd', 'ae', 'af', 'ch', 
-    'dg', 'ej', 'fk', 'gl', 'np', 'nt', 'nj', 
-]
-onScreenEstimatedEdges = ['in', 'fo', 'gm']
+    'sb', 'ba', 'bc', 'bd',]
+# 'ae', 'af', 'ch', 
+#     'dg', 'ej', 'fk', 'gl', 'np', 'nt', 'nj', 
+# ]
+onScreenEstimatedEdges = []#'in', 'fo', 'gm']
+
+config.background_color = "#04f404"
 
 class Map:
     def __init__(
@@ -106,7 +109,7 @@ def listToMapAnims(dataList, mapCopy, city):
     return anims
 
 
-class MapTruth(ZoomedScene):
+class MapTruth_2(ZoomedScene):
 
     def construct(self):
         map = ImageMobject("../maps/Laileia_noCityIcons.png")
@@ -123,7 +126,7 @@ class MapTruth(ZoomedScene):
             }
         )
 
-        self.add(map)
+        # self.add(map)
         self.camera.frame.scale(0.75).shift(LEFT*1.2 + UP*0.2)
 
         maps = []
@@ -171,14 +174,14 @@ class MapTruth(ZoomedScene):
         number_plane.set_opacity(0.4)
         # self.add(number_plane)
 
-        self.add(
-            discoveredPathKey.key, shortestPathFoundKey.key, 
-            estimatedShortestPath.key, mapPin,
-            visitedList.box, discoveredList.box,
-        )
+        # self.add(
+        #     discoveredPathKey.key, shortestPathFoundKey.key, 
+        #     estimatedShortestPath.key, mapPin,
+        #     visitedList.box, discoveredList.box,
+        # )
 
-
-        for city in cities:
+        citiesOnScreen = ['s', 'a', 'b', 'c', 'd']
+        for city in citiesOnScreen:
             self.add(maps[0].mapCities[city], maps[0].cityLabels[city])
         for edge in onScreenGreyEdges:
             self.add(maps[0].greyedEdges[edge], maps[0].greyedWeights[edge])
@@ -196,42 +199,42 @@ class MapTruth(ZoomedScene):
 
 
 
-        anims = discoveredList.addCities(
-            [
-                ListCity("I", "N", 19),
-                ListCity("O", "F", 20),
-                ListCity("M", "G", 22),
-            ],
-            FADEIN, maps[0].cityLabels,
-            fadeInTogether=True,
-        )
-        anims += visitedList.addCities(
-            [
-                ListCity("I", "N", 19), ListCity("A", "S", 19),
-                ListCity("O", "F", 20), ListCity("B", "S", 19),
-                ListCity("M", "G", 22), ListCity("C", "S", 19),
-            ],
-            FADEIN, maps[0].cityLabels,
-            fadeInTogether=True,
-        )
-        self.play(*anims)
-        anims = visitedList.addCities([ListCity("K", "F", 14)], ZOOM, maps[0].cityLabels)
-        self.play(*anims)
-        anims = visitedList.addCities([ListCity("L", "G", 14)], ZOOM, maps[0].cityLabels)
-        self.play(*anims)
-        anims = visitedList.addCities([ListCity("N", "J", 16)], ZOOM, maps[0].cityLabels)
-        self.play(*anims)
-        anims = visitedList.addCities([ListCity("P", "N", 17)], ZOOM, maps[0].cityLabels)
-        self.play(*anims)
-        anims = visitedList.addCities([ListCity("T", "N", 18)], ZOOM, maps[0].cityLabels)
-        self.play(*anims)
-        self.wait(2)
-        #-------------------------------------------------------------
+        # anims = discoveredList.addCities(
+        #     [
+        #         ListCity("I", "N", 19),
+        #         ListCity("O", "F", 20),
+        #         ListCity("M", "G", 22),
+        #     ],
+        #     FADEIN, maps[0].cityLabels,
+        #     fadeInTogether=True,
+        # )
+        # anims += visitedList.addCities(
+        #     [
+        #         ListCity("I", "N", 19), ListCity("A", "S", 19),
+        #         ListCity("O", "F", 20), ListCity("B", "S", 19),
+        #         ListCity("M", "G", 22), ListCity("C", "S", 19),
+        #     ],
+        #     FADEIN, maps[0].cityLabels,
+        #     fadeInTogether=True,
+        # )
+        # self.play(*anims)
+        # anims = visitedList.addCities([ListCity("K", "F", 14)], ZOOM, maps[0].cityLabels)
+        # self.play(*anims)
+        # anims = visitedList.addCities([ListCity("L", "G", 14)], ZOOM, maps[0].cityLabels)
+        # self.play(*anims)
+        # anims = visitedList.addCities([ListCity("N", "J", 16)], ZOOM, maps[0].cityLabels)
+        # self.play(*anims)
+        # anims = visitedList.addCities([ListCity("P", "N", 17)], ZOOM, maps[0].cityLabels)
+        # self.play(*anims)
+        # anims = visitedList.addCities([ListCity("T", "N", 18)], ZOOM, maps[0].cityLabels)
+        # self.play(*anims)
+        # self.wait(2)
+        # #-------------------------------------------------------------
 
-        anims = ScaleMap(maps[0])
-        anims.append(ScaleInPlace(mapPin, 1.3, rate_func = rate_functions.there_and_back))
-        self.wait()
-        self.play(*anims, run_time = 2)
+        # anims = ScaleMap(maps[0])
+        # anims.append(ScaleInPlace(mapPin, 1.3, rate_func = rate_functions.there_and_back))
+        # self.wait()
+        # self.play(*anims, run_time = 2)
 
         
         self.wait(2)
@@ -274,44 +277,44 @@ class MapTruth(ZoomedScene):
 
 
 
-        self.wait(3)
-        self.play(FadeOut(mapPin))
+        # self.wait(3)
+        # self.play(FadeOut(mapPin))
 
-        l = len(altPositions)
-        for i in range(l-1):
-            print(i)
-            anims = transformMap(maps[i], maps[i+1])
-            self.play(*anims)
-            self.wait()
+        # l = len(altPositions)
+        # for i in range(l-1):
+        #     print(i)
+        #     anims = transformMap(maps[i], maps[i+1])
+        #     self.play(*anims)
+        #     self.wait()
 
-        self.wait()
+        # self.wait()
 
-        vListMobjects = []
-        for i in range(len(visitedList.cityVGroups2)):
-            obj = visitedList.cityVGroups2[i]
-            obj.set_z_index(visitedList.heading.z_index + 1)
-            if i != 0:
-                vListMobjects.append(obj)
-        vListMobjects += [visitedList.box, visitedList.ellipses,]
-        vList = VGroup(*vListMobjects)
+        # vListMobjects = []
+        # for i in range(len(visitedList.cityVGroups2)):
+        #     obj = visitedList.cityVGroups2[i]
+        #     obj.set_z_index(visitedList.heading.z_index + 1)
+        #     if i != 0:
+        #         vListMobjects.append(obj)
+        # vListMobjects += [visitedList.box, visitedList.ellipses,]
+        # vList = VGroup(*vListMobjects)
         
-        dListMobjects = []
-        for i in range(len(discoveredList.cityVGroups2)):
-            obj = discoveredList.cityVGroups2[i]
-            obj.set_z_index(discoveredList.heading.z_index + 1)
-            dListMobjects.append(obj)
-        dListMobjects += [discoveredList.box]
-        dList = VGroup(*dListMobjects)
+        # dListMobjects = []
+        # for i in range(len(discoveredList.cityVGroups2)):
+        #     obj = discoveredList.cityVGroups2[i]
+        #     obj.set_z_index(discoveredList.heading.z_index + 1)
+        #     dListMobjects.append(obj)
+        # dListMobjects += [discoveredList.box]
+        # dList = VGroup(*dListMobjects)
         
-        self.play(
-            ScaleInPlace(vList, 1.2, rate_func = rate_functions.there_and_back),
-            ScaleInPlace(dList, 1.2, rate_func = rate_functions.there_and_back),
-        )
-        self.wait()
+        # self.play(
+        #     ScaleInPlace(vList, 1.2, rate_func = rate_functions.there_and_back),
+        #     ScaleInPlace(dList, 1.2, rate_func = rate_functions.there_and_back),
+        # )
+        # self.wait()
 
         
 
-        self.wait(2)
+        # self.wait(2)
 
         
 

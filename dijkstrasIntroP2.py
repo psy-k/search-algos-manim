@@ -11,16 +11,16 @@ from overlappingAnims import *
 UPDATE = "update"
 ADD = "add"
 
-class DijkstrasIntroP2(ZoomedScene):
+class DijkstrasIntroP2_C(ZoomedScene):
     def playAnimsFromList(self, anims, concurrent=False):
         if concurrent:
-            animsToPlay = [anims[i] for i in range(len(anims)) if anims[i] != None]
+            animsToPlay = [anims[i] for i in range(len(anims)) if anims[i] != None and anims[i] != KEEP_ORIGINAL]
             self.play(*animsToPlay)
         else:
             for anim in anims:
                 if anim == None:
                     self.wait()
-                else:
+                elif anim != KEEP_ORIGINAL:
                     self.play(anim)
 
 
@@ -76,6 +76,7 @@ class DijkstrasIntroP2(ZoomedScene):
             UP*2.2 + LEFT*6.2
         )
 
+        mapCities['s'].set_fill_color(visitedCityIconCenterColor)
         mapCities['t'].set_fill_color(targetCityIconCenterColor)
         mapCities['t'].set_stroke_color(targetCityIconBorderColor)
 
@@ -115,60 +116,8 @@ class DijkstrasIntroP2(ZoomedScene):
             visitedList.box, discoveredList.box,
             mapPin,
         )
-        animsMisc = visitedList.addCities(
-                        visitedListInitialCities, FADEIN, cityLabels, fadeInTogether=True
-                    ) + discoveredList.addCities(
-                            discoveredListInitialCities, FADEIN, cityLabels, fadeInTogether=True
-                        )
 
-        self.play(*animsMisc)
-        self.wait()
-
-        addItemsForExplanationAnims = [
-            AnimationGroup(GrowFromCenter(mapCities["g"], rate_func= rate_functions.ease_out_back),
-                           GrowFromCenter(cityLabels["g"], rate_func= rate_functions.ease_out_back)),
-            AnimationGroup(GrowFromCenter(mapCities["h"], rate_func= rate_functions.ease_out_back),
-                           GrowFromCenter(cityLabels["h"], rate_func= rate_functions.ease_out_back)),
-            AnimationGroup(GrowFromCenter(mapCities["k"], rate_func= rate_functions.ease_out_back),
-                           GrowFromCenter(cityLabels["k"], rate_func= rate_functions.ease_out_back)),
-            AnimationGroup(GrowFromCenter(mapCities["j"], rate_func= rate_functions.ease_out_back),
-                           GrowFromCenter(cityLabels["j"], rate_func= rate_functions.ease_out_back)),
-
-            mapCities['s'].animate.set_fill_color(visitedCityIconCenterColor),
-            mapCities['a'].animate.set_fill_color(visitedCityIconCenterColor),
-            mapCities['b'].animate.set_fill_color(visitedCityIconCenterColor),
-            mapCities['c'].animate.set_fill_color(visitedCityIconCenterColor),
-            mapCities['d'].animate.set_fill_color(visitedCityIconCenterColor),
-            mapCities['e'].animate.set_fill_color(visitedCityIconCenterColor),
-
-            Create(greyedEdges['ej']),
-            Create(greyedEdges['ch']),
-            Create(greyedEdges['gd']),
-            Create(greyedEdges['kd']),
-            Create(greyedWeights['ej']),
-            Create(greyedWeights['ch']),
-            Create(greyedWeights['gd']),
-            Create(greyedWeights['kd']),
-
-            LaggedStart(Create(edges['sb']),FadeIn(weights['sb']),lag_ratio = 0.2,),
-            LaggedStart(Create(edges['ab']),FadeIn(weights['ab']),lag_ratio = 0.2,),
-            LaggedStart(Create(edges['cb']),FadeIn(weights['cb']),lag_ratio = 0.2,),
-            LaggedStart(Create(edges['db']),FadeIn(weights['db']),lag_ratio = 0.2,),
-            LaggedStart(Create(edges['ae']),FadeIn(weights['ae']),lag_ratio = 0.2,),
-        ]
-
-
-        rect1 = SurroundingRectangle(discoveredList.cityVGroups2[0], color = BLUE, buff=0.15)
-        rect2 = SurroundingRectangle(discoveredList.cityDistanceMobjects[0], color = RED)
-        shortestPossiblePathText = Paragraph(
-           "Shortest",
-           "Possible",
-           "Path",
-           alignment="center",
-           color = BLUE,
-        ).scale(0.2).move_to(edges['af'].get_center() + LEFT*0.35 + DOWN*0.25)
-
-
+        
         undiscoveredCity = Dot(
                             radius=dotRadius, 
                             point=UP*-0.15 + LEFT*0.2, 
@@ -212,7 +161,7 @@ class DijkstrasIntroP2(ZoomedScene):
             hypotheticalEdges[neighbour+parent].set_z_index(greyedEdges[neighbour+parent].z_index+1)
             xEdges[neighbour + 'x'] = xEdges['x' + neighbour]
             hypotheticalEdges[parent+neighbour] = hypotheticalEdges[neighbour+parent]
-        hypotheticalPathKey = PathKey(BLUE, "Hypothetical Path", UP*2.8 + LEFT*6.2,)
+        hypotheticalPathKey = PathKey(BLUE, "Hypothetical Path", UP*2.2 + LEFT*6.2,)
 
         hypotehticalDistances = [
             MarkupText("12 + d<sub>H to X</sub>", color = BLUE).scale(0.2).
@@ -226,9 +175,96 @@ class DijkstrasIntroP2(ZoomedScene):
         ]
 
 
+        distanceTxts = ["11",  "<", '12', ',', '12', ',', '14', ',', '18']
+        offsets = [
+            UP*0, RIGHT*0.05, RIGHT*0.1, 
+            RIGHT*0.1+DOWN*0.08, RIGHT*0.1, 
+            RIGHT*0.1+DOWN*0.08, RIGHT*0.1, 
+            RIGHT*0.1+DOWN*0.08, RIGHT*0.1
+        ]
+        greaterThanTexts = [
+            Text(str(distanceTxts[i]), color=textColor).scale(0.3).shift(LEFT*(0.50-i*0.15) + DOWN*1.8 + offsets[i])
+            for i in range(len(distanceTxts))
+        ]
 
-        self.play(*addItemsForExplanationAnims)
+        # for mobj in greaterThanTexts:
+        #     self.add(mobj)
+        
+        #-------------------------------------------------------
+        #-------------------------------------------------------
+        #-----------------------Anims----------------------------
+        #-------------------------------------------------------
+        #-------------------------------------------------------
+        
         self.wait()
+
+        visitedAnims = [
+            AnimationGroup(
+                LaggedStart(Create(edges['sb']),FadeIn(weights['sb']),lag_ratio = 0.2,),
+                LaggedStart(Create(edges['ab']),FadeIn(weights['ab']),lag_ratio = 0.2,),
+                LaggedStart(Create(edges['cb']),FadeIn(weights['cb']),lag_ratio = 0.2,),
+                LaggedStart(Create(edges['db']),FadeIn(weights['db']),lag_ratio = 0.2,),
+                LaggedStart(Create(edges['ae']),FadeIn(weights['ae']),lag_ratio = 0.2,),
+                mapCities['s'].animate.set_fill_color(visitedCityIconCenterColor),
+                mapCities['a'].animate.set_fill_color(visitedCityIconCenterColor),
+                mapCities['b'].animate.set_fill_color(visitedCityIconCenterColor),
+                mapCities['c'].animate.set_fill_color(visitedCityIconCenterColor),
+                mapCities['d'].animate.set_fill_color(visitedCityIconCenterColor),
+                mapCities['e'].animate.set_fill_color(visitedCityIconCenterColor),
+            ),
+        ]
+        anims = visitedList.addCities(
+                        visitedListInitialCities, FADEIN, cityLabels, fadeInTogether=True
+                    ) 
+        visitedAnims.append(AnimationGroup(*anims))
+
+        self.play(LaggedStart(*visitedAnims, lag_ratio=0.2))
+        self.wait()
+        self.play(FadeIn(shortestPathFoundKey.key))
+
+        self.wait()
+
+        discoveredAnims = [
+            AnimationGroup(GrowFromCenter(mapCities["g"], rate_func= rate_functions.ease_out_back),
+                           GrowFromCenter(cityLabels["g"], rate_func= rate_functions.ease_out_back)),
+            AnimationGroup(GrowFromCenter(mapCities["h"], rate_func= rate_functions.ease_out_back),
+                           GrowFromCenter(cityLabels["h"], rate_func= rate_functions.ease_out_back)),
+            AnimationGroup(GrowFromCenter(mapCities["k"], rate_func= rate_functions.ease_out_back),
+                           GrowFromCenter(cityLabels["k"], rate_func= rate_functions.ease_out_back)),
+            AnimationGroup(GrowFromCenter(mapCities["j"], rate_func= rate_functions.ease_out_back),
+                           GrowFromCenter(cityLabels["j"], rate_func= rate_functions.ease_out_back)),
+
+            Create(greyedEdges['ej']),
+            Create(greyedEdges['ch']),
+            Create(greyedEdges['gd']),
+            Create(greyedEdges['kd']),
+            Create(greyedWeights['ej']),
+            Create(greyedWeights['ch']),
+            Create(greyedWeights['gd']),
+            Create(greyedWeights['kd']),      
+        ]
+
+        anims = discoveredList.addCities(
+                        discoveredListInitialCities, FADEIN, cityLabels, fadeInTogether=True
+                    )
+        discoveredAnims.append(AnimationGroup(*anims))
+
+        self.play(LaggedStart(*discoveredAnims, lag_ratio=0.2))
+        self.wait()
+        self.play(FadeIn(discoveredPathKey.key))
+
+        self.wait()
+
+
+        rect1 = SurroundingRectangle(discoveredList.cityVGroups2[0], color = BLUE, buff=0.15)
+        rect2 = SurroundingRectangle(discoveredList.cityDistanceMobjects[0], color = RED)
+        shortestPossiblePathText = Paragraph(
+           "Shortest",
+           "Possible",
+           "Path",
+           alignment="center",
+           color = BLUE,
+        ).scale(0.2).move_to(edges['af'].get_center() + LEFT*0.35 + DOWN*0.25)
 
 
         #
@@ -264,92 +300,121 @@ class DijkstrasIntroP2(ZoomedScene):
         )
         self.wait()
 
-        noOfDiscoveredCities = len(discoveredList.cityVGroups2)
-        discoveredCitiesAnims = []
-        for i in range(1, noOfDiscoveredCities):
-            discoveredCitiesAnims.append(
-                AnimationGroup(
-                    ScaleInPlace(
-                        discoveredList.cityNameMobjects[i],
-                        1.2,
-                        rate_func = rate_functions.there_and_back
-                    ),
-                    ScaleInPlace(
-                        discoveredList.cityDistanceMobjects[i],
-                        1.2,
-                        rate_func = rate_functions.there_and_back
-                    ),
-                )
-            )
+        # noOfDiscoveredCities = len(discoveredList.cityVGroups2)
+        # discoveredCitiesAnims = []
+        # alreadyDiscovered = ['b', 'j', 'k', 'g', 'h']
+        # for i in range(1, noOfDiscoveredCities):
+        #     discoveredCitiesAnims.append(
+        #         AnimationGroup(
+        #             ScaleInPlace(
+        #                 mapCities[alreadyDiscovered[i]],
+        #                 1.2,
+        #                 rate_func = rate_functions.there_and_back
+        #             ),
+        #             ScaleInPlace(
+        #                 discoveredList.cityNameMobjects[i],
+        #                 1.2,
+        #                 rate_func = rate_functions.there_and_back
+        #             ),
+        #             ScaleInPlace(
+        #                 discoveredList.cityDistanceMobjects[i],
+        #                 1.2,
+        #                 rate_func = rate_functions.there_and_back
+        #             ),
+        #         )
+        #     )
 
-        self.play(LaggedStart(*discoveredCitiesAnims, lag_ratio=0.2))
-        self.wait()
-        highlightColor = RED
-        self.play(discoveredList.cityNameMobjects[0].animate.scale(1.2).set_color(highlightColor))
-        self.wait()
-        self.play(discoveredList.cityDistanceMobjects[0].animate.scale(1.2).set_color(highlightColor))
-        self.wait()
+        # self.play(LaggedStart(*discoveredCitiesAnims, lag_ratio=0.2))
+        # self.wait()
 
-        anims = [discoveredList.cityDistanceMobjects[i].animate.scale(1.3) 
-                 for i in range(1, noOfDiscoveredCities)]
-        self.play(*anims)
-        self.wait()
+        # discoveredCitiesDistAnims = []
+        # for i in range(1, noOfDiscoveredCities):
+        #     discoveredCitiesDistAnims.append(
+        #             ScaleInPlace(
+        #                 discoveredList.cityDistanceMobjects[i],
+        #                 1.2,
+        #             )
+        #     )
 
-        anims = [discoveredList.cityDistanceMobjects[i].animate.scale(1/1.3) 
-                 for i in range(1, noOfDiscoveredCities)] + [
-                    discoveredList.cityNameMobjects[0].animate.scale(1/1.2).set_color(BLACK),
-                    discoveredList.cityDistanceMobjects[0].animate.scale(1/1.2).set_color(BLACK)
-                ]
-        self.play(*anims)
-        self.wait(2)
+        # self.play(LaggedStart(*discoveredCitiesDistAnims, lag_ratio=0.2))
+        # self.wait()
 
-        self.play(
-            GrowFromCenter(undiscoveredCity), GrowFromCenter(undiscoveredCityLabel),
-            Create(xEdges['fx'])
-        )
-        self.wait()
+        # greaterThanAnims = []
+        # for i in range(len(discoveredList.cityDistanceMobjects)):
+        #     greaterThanAnims.append(
+        #         TransformFromCopy(discoveredList.cityDistanceMobjects[i], greaterThanTexts[2*i]),
+        #     )
+        #     if i != len(discoveredList.cityDistanceMobjects)-1:
+        #         greaterThanAnims.append(FadeIn(greaterThanTexts[2*i+1]))
+        # self.play(LaggedStart(*greaterThanAnims), lag_ratio = 0.15)
 
-        anims = []
-        for i in range(len(xNeighbours)):
-            neighbour = xNeighbours[i]
-            parent  = xNeighboursParents[i]
+        # self.wait()
 
-            anims.append(
-                LaggedStart(
-                    Create(hypotheticalEdges[neighbour+parent]),
-                    Create(xEdges[neighbour+'x']),
-                    lag_ratio=1
-                )
-            )
-        self.play(LaggedStart(*anims, lag_ratio=0.3), FadeIn(hypotheticalPathKey.key))
-        self.wait()
+        # resetAnims = []
+        # for i in range(1, noOfDiscoveredCities):
+        #     resetAnims.append(
+        #         ScaleInPlace(discoveredList.cityDistanceMobjects[i], 1/1.2)
+        #     )
+        # for i in range(len(greaterThanTexts)):
+        #     resetAnims.append(FadeOut(greaterThanTexts[i]))
+        # self.play(*resetAnims)
+        # self.wait()
 
-        anims = []
-        indices = [3, 2, 4, 1]
-        for i in range(len(xNeighbours)):
-            anims.append(
-                LaggedStart(
-                    TransformFromCopy(discoveredList.cityDistanceMobjects[indices[i]], hypotehticalDistances[i][:2]),
-                    FadeIn(hypotehticalDistances[i][2:3]),
-                    FadeIn(hypotehticalDistances[i][3:]),
-                    lag_ratio = 1,
-                )
-            )
+
+        # self.play(
+        #     LaggedStart(
+        #         AnimationGroup(
+        #             GrowFromCenter(undiscoveredCity), 
+        #             GrowFromCenter(undiscoveredCityLabel),
+        #         ),
+        #         Create(xEdges['fx'], run_time = 0.7),
+        #         lag_ratio=0.6
+        #     )
+        # )
+        # self.wait()
+
+        # anims = []
+        # for i in range(len(xNeighbours)):
+        #     neighbour = xNeighbours[i]
+        #     parent  = xNeighboursParents[i]
+
+        #     anims.append(
+        #         LaggedStart(
+        #             Create(hypotheticalEdges[neighbour+parent]),
+        #             Create(xEdges[neighbour+'x']),
+        #             lag_ratio=1
+        #         )
+        #     )
+        # self.play(LaggedStart(*anims, lag_ratio=0.3), FadeIn(hypotheticalPathKey.key))
+        # self.wait()
+
+        # anims = []
+        # indices = [3, 2, 4, 1]
+        # for i in range(len(xNeighbours)):
+        #     anims.append(
+        #         LaggedStart(
+        #             TransformFromCopy(discoveredList.cityDistanceMobjects[indices[i]], hypotehticalDistances[i][:2]),
+        #             FadeIn(hypotehticalDistances[i][2:3]),
+        #             FadeIn(hypotehticalDistances[i][3:]),
+        #             lag_ratio = 0.3,
+        #         )
+        #     )
         
-        self.play(LaggedStart(*anims, lag_ratio = 1))
-        self.wait()
+        # self.play(LaggedStart(*anims, lag_ratio = 0.3))
+        # self.wait()
 
-        resetAnims = [
-            Uncreate(hypotheticalEdges['ch']), Uncreate(hypotheticalEdges['dg']), 
-            Uncreate(hypotheticalEdges['dk']), Uncreate(hypotheticalEdges['ej']), 
-            Uncreate(xEdges['xf']), Uncreate(xEdges['xj']), Uncreate(xEdges['xh']), 
-            Uncreate(xEdges['xg']), Uncreate(xEdges['xk']),
-            ShrinkToCenter(undiscoveredCity, rate_func = rate_functions.ease_in_back),
-            ShrinkToCenter(undiscoveredCityLabel, rate_func = rate_functions.ease_in_back),
-            FadeOut( *[hypotehticalDistances[i] for i in range(4)]),
-        ]
-        self.play(*resetAnims)
-        self.wait()
+        # resetAnims = [
+        #     Uncreate(hypotheticalEdges['ch']), Uncreate(hypotheticalEdges['dg']), 
+        #     Uncreate(hypotheticalEdges['dk']), Uncreate(hypotheticalEdges['ej']), 
+        #     Uncreate(xEdges['xf']), Uncreate(xEdges['xj']), Uncreate(xEdges['xh']), 
+        #     Uncreate(xEdges['xg']), Uncreate(xEdges['xk']),
+        #     ShrinkToCenter(undiscoveredCity, rate_func = rate_functions.ease_in_back),
+        #     ShrinkToCenter(undiscoveredCityLabel, rate_func = rate_functions.ease_in_back),
+        #     FadeOut( *[hypotehticalDistances[i] for i in range(4)]),
+        #     FadeOut(hypotheticalPathKey.key)
+        # ]
+        # self.play(*resetAnims)
+        # self.wait()
 
 
 
@@ -361,10 +426,10 @@ class DijkstrasIntroP2(ZoomedScene):
         nextCity = discoveredList.cities[0]
 
         anims = discoveredList.removeFirstEntry()
-        self.playAnimsFromList(anims)
+        # self.playAnimsFromList(anims)
         
-        anims = visitedList.addCities([nextCity], ZOOM, cityLabels)
-        self.playAnimsFromList(anims)
+        anims += visitedList.addCities([nextCity], ZOOM, cityLabels)
+        # self.playAnimsFromList(anims)
         self.wait()
 
 
@@ -378,102 +443,116 @@ class DijkstrasIntroP2(ZoomedScene):
         ]
         
         path = ['s', 'b', 'a', 'f']
+        movePinAnims = []
         for index in range(len(path)-1):
-            self.play(
+            # self.play(
+            movePinAnims.append(
                 mapPin.animate.move_to(mapCities[path[index]].get_center() + UP*0.1)
             )
+        movePinAnims += [
+            LaggedStart(
+            mapPin.animate.move_to(mapCities['f'].get_center() + UP*0.1),
+            Create(edges['af']),FadeIn(weights['af']),
+            lag_ratio=0.15,
+            )
+        ]
+
+        self.play(
+            LaggedStart(*anims, lag_ratio=1),
+            LaggedStart(*movePinAnims, lag_ratio=1)
+        )
 
 
-        self.playAnimsFromList(moveToNextAnims, concurrent=True)
+        # self.playAnimsFromList()
         self.play(mapCities[nextCity.name.lower()].animate.set_fill_color(visitedCityIconCenterColor))
         self.wait()
 
 
-        neighbours = []
-        actions = []
-        createEdgesAnims = []
-        discoverCitiesAnims = []
-        visited = ['s', 'b', 'a', 'c', 'd', 'e']
-        discovered = ['f', 'j', 'k', 'g', 'h']
-        edgesOnScreen = ['af']
-        for city in adjLists[nextCity.name.lower()]:
-            edgeKey = city + nextCity.name.lower()
-            revEdgeKey = nextCity.name.lower() + city
-            if edgeKey not in edgesOnScreen:
-                createEdgesAnims.append(
-                    LaggedStart(
-                        Create(greyedEdges[edgeKey]),
-                        FadeIn(greyedWeights[edgeKey]),
-                        lag_ratio = 0.2
-                    )
-                )
-                edgesOnScreen.append(edgeKey)
-                edgesOnScreen.append(revEdgeKey)
-            if city not in visited:
+        # neighbours = []
+        # actions = []
+        # createEdgesAnims = []
+        # discoverCitiesAnims = []
+        # visited = ['s', 'b', 'a', 'c', 'd', 'e']
+        # discovered = ['f', 'j', 'k', 'g', 'h']
+        # edgesOnScreen = ['af']
+        # for city in adjLists[nextCity.name.lower()]:
+        #     edgeKey = city + nextCity.name.lower()
+        #     revEdgeKey = nextCity.name.lower() + city
+        #     if edgeKey not in edgesOnScreen:
+        #         createEdgesAnims.append(
+        #             LaggedStart(
+        #                 Create(greyedEdges[edgeKey]),
+        #                 FadeIn(greyedWeights[edgeKey]),
+        #                 lag_ratio = 0.2
+        #             )
+        #         )
+        #         edgesOnScreen.append(edgeKey)
+        #         edgesOnScreen.append(revEdgeKey)
+        #     if city not in visited:
                 
-                if city not in discovered:
-                    neighbours.append(
-                        ListCity(
-                            city.upper(),
-                            nextCity.name,
-                            nextCity.distance + pathWeightsDict[nextCity.name.lower() + city]
-                        )
-                    )
-                    actions.append(ADD)
-                    discovered.append(city)
-                    discoverCitiesAnims.append(
-                        AnimationGroup(
-                            GrowFromCenter(mapCities[city]),
-                            GrowFromCenter(cityLabels[city])
-                        )
-                    )
-                else:
-                    neighbours.append(city.upper())
-                    actions.append(UPDATE)
+        #         if city not in discovered:
+        #             neighbours.append(
+        #                 ListCity(
+        #                     city.upper(),
+        #                     nextCity.name,
+        #                     nextCity.distance + pathWeightsDict[nextCity.name.lower() + city]
+        #                 )
+        #             )
+        #             actions.append(ADD)
+        #             discovered.append(city)
+        #             discoverCitiesAnims.append(
+        #                 AnimationGroup(
+        #                     GrowFromCenter(mapCities[city]),
+        #                     GrowFromCenter(cityLabels[city])
+        #                 )
+        #             )
+        #         else:
+        #             neighbours.append(city.upper())
+        #             actions.append(UPDATE)
 
-        neighbouringAnims = discoverCitiesAnims + createEdgesAnims
+        # neighbouringAnims = discoverCitiesAnims + createEdgesAnims
 
-        if len(neighbouringAnims) > 0:
-            self.play(*neighbouringAnims)
-            self.wait()
+        # if len(neighbouringAnims) > 0:
+        #     self.play(*neighbouringAnims)
+        #     self.wait()
         
-        for i in range(len(neighbours)):
-            if actions[i] == ADD:
-                addAnims = discoveredList.addCities([neighbours[i]], FADEIN, cityLabels)
-                distanceAsSumAnims = discoveredList.showDistanceAsSum(
-                    len(discoveredList.cities)-1,
-                    nextCity.distance,
-                    pathWeightsDict[nextCity.name.lower() + neighbours[i].name.lower()],
-                    nextCity.name,
-                    visitedList.cityDistanceMobjects[-1],
-                    greyedWeights[nextCity.name.lower() + neighbours[i].name.lower()],
-                    onNewCityAdded=True
-                )
-                anims = []
-                anims.append(addAnims[0])
-                anims += distanceAsSumAnims[:-2]
-                anims.append(addAnims[1])
-                anims += distanceAsSumAnims[-2:]
-                edgeKey = neighbours[i].name.lower() + nextCity.name.lower()
-            elif actions[i] == UPDATE:
-                distanceAsSumAnims = discoveredList.updateDistance(
-                    neighbours[i],
-                    nextCity.distance,
-                    pathWeightsDict[nextCity.name.lower() + neighbours[i].lower()],
-                    nextCity.name,
-                    cityLabels[neighbours[i].lower()],
-                    visitedList.cityDistanceMobjects[-1],
-                    greyedWeights[nextCity.name.lower() + neighbours[i].lower()],
-                )
-                anims = distanceAsSumAnims
+        # for i in range(len(neighbours)):
+        #     if actions[i] == ADD:
+        #         addAnims = discoveredList.addCities([neighbours[i]], FADEIN, cityLabels)
+        #         distanceAsSumAnims = discoveredList.showDistanceAsSum(
+        #             len(discoveredList.cities)-1,
+        #             nextCity.distance,
+        #             pathWeightsDict[nextCity.name.lower() + neighbours[i].name.lower()],
+        #             nextCity.name,
+        #             visitedList.cityDistanceMobjects[-1],
+        #             greyedWeights[nextCity.name.lower() + neighbours[i].name.lower()],
+        #             onNewCityAdded=True
+        #         )
+        #         anims = []
+        #         anims.append(addAnims[0])
+        #         anims += distanceAsSumAnims[:-2]
+        #         anims.append(addAnims[1])
+        #         anims += distanceAsSumAnims[-2:]
+        #         edgeKey = neighbours[i].name.lower() + nextCity.name.lower()
+        #     elif actions[i] == UPDATE:
+        #         distanceAsSumAnims = discoveredList.updateDistance(
+        #             neighbours[i],
+        #             nextCity.distance,
+        #             pathWeightsDict[nextCity.name.lower() + neighbours[i].lower()],
+        #             nextCity.name,
+        #             cityLabels[neighbours[i].lower()],
+        #             visitedList.cityDistanceMobjects[-1],
+        #             greyedWeights[nextCity.name.lower() + neighbours[i].lower()],
+        #         )
+        #         anims = distanceAsSumAnims
 
-            self.playAnimsFromList(anims)
-            self.wait()
+        #     self.playAnimsFromList(anims)
+        #     self.wait()
 
-            sortAnims = discoveredList.sortList()
-            self.playAnimsFromList(sortAnims)
-            self.wait()
+        #     sortAnims = discoveredList.sortList()
+        #     self.playAnimsFromList(sortAnims)
+        #     self.wait()
 
 
 
-            self.wait(2)
+        self.wait(2)

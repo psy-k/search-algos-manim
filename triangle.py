@@ -90,7 +90,7 @@ class TriangleIneq(ZoomedScene):
             ),
         ]
         traingleWeigths = [
-            greyedWeights['as'].copy().set_color(BLACK),
+            estimatedShortestPathWeights['as'].copy().set_color(BLACK),
             estimatedShortestPathWeights['ab'].copy().set_color(BLACK),
             weights['sb'].copy().set_color(BLACK),
         ]
@@ -129,10 +129,10 @@ class TriangleIneq(ZoomedScene):
             mapCities['s'], mapCities['a'], mapCities['b'], mapCities['c'], mapCities['d'],
             cityLabels['s'], cityLabels['a'], cityLabels['b'], cityLabels['c'], cityLabels['d'],
 
-            greyedEdges['as'], edges['sb'], 
-            estimatedShortestPathEdges['ba'], estimatedShortestPathEdges['bc'], estimatedShortestPathEdges['bd'],  
-            greyedWeights['as'], weights['sb'], 
-            estimatedShortestPathWeights['ba'], estimatedShortestPathEdges['bc'], estimatedShortestPathEdges['bd'],  
+            estimatedShortestPathEdges['as'], edges['sb'], 
+            greyedEdges['ba'], greyedEdges['bc'], greyedEdges['bd'],  
+            estimatedShortestPathWeights['as'], weights['sb'], 
+            greyedWeights['ba'], greyedWeights['bc'], greyedWeights['bd'],  
         )
 
         anims = visitedList.addCities(
@@ -142,7 +142,7 @@ class TriangleIneq(ZoomedScene):
             fadeInTogether=True
         )
         anims += discoveredList.addCities(
-            [ListCity("A", "B", 3), ListCity("C", "B", 7), ListCity("D", "B", 8)], 
+            [ListCity("A", "S", 4)],# ListCity("C", "B", 7), ListCity("D", "B", 8)], 
             cityLabels=cityLabels,
             animType=FADEIN, 
             fadeInTogether=True
@@ -159,8 +159,8 @@ class TriangleIneq(ZoomedScene):
                 
                 mapCities['c'], mapCities['d'],
                 cityLabels['c'], cityLabels['d'],
-                estimatedShortestPathEdges['bc'], estimatedShortestPathEdges['bd'],
-                estimatedShortestPathEdges['bc'], estimatedShortestPathEdges['bd'],
+                greyedEdges['bc'], greyedEdges['bd'],
+                greyedWeights['bc'], greyedWeights['bd'],
             )
         )
         # self.wait()
@@ -235,8 +235,8 @@ class TriangleIneq(ZoomedScene):
                 
                 mapCities['c'], mapCities['d'],
                 cityLabels['c'], cityLabels['d'],
-                estimatedShortestPathEdges['bc'], estimatedShortestPathEdges['bd'],
-                estimatedShortestPathEdges['bc'], estimatedShortestPathEdges['bd'],
+                greyedEdges['bc'], greyedEdges['bd'],
+                greyedWeights['bc'], greyedWeights['bd'],
             )
         )
 

@@ -10,17 +10,19 @@ from overlappingAnims import *
 UPDATE = "update"
 ADD = "add"
 
-class DijkstrasLogic(ZoomedScene):
+class DijkstrasLogic_2(ZoomedScene):
     def playAnimsFromList(self, anims, concurrent=False):
         if concurrent:
             animsToPlay = [anims[i] for i in range(len(anims)) if anims[i] != None]
             self.play(*animsToPlay)
         else:
             for anim in anims:
-                if anim == None:
-                    self.wait()
-                else:
+                if anim != None and anim != 'animFlag':
                     self.play(anim)
+                # if anim == None:
+                #     self.wait(0)
+                # elif anim != 'animFlag':
+                #     self.play(anim)
 
 
     def construct(self):
@@ -90,6 +92,7 @@ class DijkstrasLogic(ZoomedScene):
         edgesOnScreen = ['sa', 'as', 'sb', 'bs']
 
         shortestPathKeyOnScreen = False
+        self.add(shortestPathFoundKey.key)
 
         def visitNextCity():
             nonlocal shortestPathKeyOnScreen 
@@ -104,26 +107,26 @@ class DijkstrasLogic(ZoomedScene):
             
             anims = visitedList.addCities([nextCity], ZOOM, cityLabels)
             self.playAnimsFromList(anims)
-            self.wait()
+            # self.wait()
 
 
-            moveToNextAnims = []
-            if shortestPathKeyOnScreen == False:
-                moveToNextAnims += [FadeIn(shortestPathFoundKey.key)]
-                shortestPathKeyOnScreen = True
+            # moveToNextAnims = []
+            # if shortestPathKeyOnScreen == False:
+            #     moveToNextAnims += [FadeIn(shortestPathFoundKey.key)]
+            #     shortestPathKeyOnScreen = True
             
 
             # movePinToCityAnims = getMovePinToCityAnims(nextCity.name, mapCities, mapPin)
 
-            moveToNextAnims += [
-                LaggedStart(
-                # movePinToCityAnims[-1],
-                mapPin.animate.move_to(mapCities[nextCity.name.lower()].get_center() + UP*0.1),
-                Create(edges[nextCity.parent.lower() + nextCity.name.lower()]),
-                FadeIn(weights[nextCity.parent.lower() + nextCity.name.lower()]),
-                lag_ratio=0.15,
-                )
-            ]
+            # moveToNextAnims += [
+            #     LaggedStart(
+            #     # movePinToCityAnims[-1],
+            #     mapPin.animate.move_to(mapCities[nextCity.name.lower()].get_center() + UP*0.1),
+            #     Create(edges[nextCity.parent.lower() + nextCity.name.lower()]),
+            #     FadeIn(weights[nextCity.parent.lower() + nextCity.name.lower()]),
+            #     lag_ratio=0.15,
+            #     )
+            # ]
             
             # print(movePinToCityAnims)
             # print(movePinToCityAnims[:-1])
@@ -136,9 +139,22 @@ class DijkstrasLogic(ZoomedScene):
             #     self.play(movePinToCityAnims[i])
             # self.playAnimsFromList(movePinToCityAnims[:-1])
 
-            self.playAnimsFromList(moveToNextAnims, concurrent=True)
-            self.play(mapCities[nextCity.name.lower()].animate.set_fill_color(visitedCityIconCenterColor))
-            self.wait()
+            # self.playAnimsFromList(moveToNextAnims, concurrent=True)
+            self.play(LaggedStart(
+                LaggedStart(
+                # movePinToCityAnims[-1],
+                mapPin.animate.move_to(mapCities[nextCity.name.lower()].get_center() + UP*0.1),
+                Create(edges[nextCity.parent.lower() + nextCity.name.lower()]),
+                FadeIn(weights[nextCity.parent.lower() + nextCity.name.lower()]),
+                lag_ratio=0.15,
+                ),
+                AnimationGroup(
+                mapCities[nextCity.name.lower()].animate.set_fill_color(visitedCityIconCenterColor),
+                run_time= 0.3
+                ),
+                lag_ratio= 0.8
+            ))
+            # self.wait()
 
 
             deadEnd = True
@@ -186,7 +202,7 @@ class DijkstrasLogic(ZoomedScene):
 
             if len(neighbouringAnims) > 0:
                 self.play(*neighbouringAnims)
-                self.wait()
+                # self.wait()
 
             if nextCity.name.lower() == 'b':
                 self.play(ScaleInPlace(greyedWeights['bc'], 1.5, rate_func = rate_functions.there_and_back))
@@ -248,16 +264,17 @@ class DijkstrasLogic(ZoomedScene):
                                 Create(estimatedShortestPathEdges[neighbours[i].lower() + newPar.lower()]),
                                 FadeIn(estimatedShortestPathWeights[neighbours[i].lower() + newPar.lower()])
                                 ),
-                                lag_ratio=0.2
+                                lag_ratio=0.2,
+                                run_time = 1
                             )
                         ]
 
                 self.playAnimsFromList(anims)
-                self.wait()
+                # self.wait()
 
                 sortAnims = discoveredList.sortList()
                 self.playAnimsFromList(sortAnims)
-                self.wait()
+                # self.wait()
 
             return nextCity.name.lower()
         
@@ -275,35 +292,37 @@ class DijkstrasLogic(ZoomedScene):
         target = 't'
 
         self.wait()
-        addSAnims = visitedList.addCities(
+        addSAnims = []
+        visitedList.addCities(
             [ListCity("S", "-", 0)],
             FADEIN,
             cityLabels,
             fadeInTogether= True
         )
-        addSAnims.append(GrowFromCenter(mapPin))
-        addSAnims.append(
-            AnimationGroup(
-                GrowFromCenter(cityLabels['s']),
-                GrowFromCenter(mapCities['s']),
-            )
+        # addSAnims.append(GrowFromCenter(mapPin))
+        # addSAnims.append(
+        #     AnimationGroup(
+        #         GrowFromCenter(cityLabels['s']),
+        #         GrowFromCenter(mapCities['s']),
+        #     )
+        # )
+
+        self.play(
+            GrowFromCenter(mapPin),
+            GrowFromCenter(cityLabels['s']),
+            GrowFromCenter(mapCities['s']),
+            visitedList.cityNameMobjects[0].animate.set_opacity(1).shift(UP*0.3)
+        ),
+        self.wait()
+        self.play(
+            visitedList.cityDistanceMobjects[0].animate.set_opacity(1).shift(UP*0.3)
         )
-        self.playAnimsFromList(addSAnims,concurrent=True)
+        # self.playAnimsFromList(addSAnims,concurrent=True)
 
         self.wait()
-
-        # self.play(
-        #     GrowFromCenter(mapCities['b']),
-        #     GrowFromCenter(mapCities['a']),
-        #     GrowFromCenter(cityLabels['b']),
-        #     GrowFromCenter(cityLabels['a']),
-        #     Create(greyedEdges['sa']),
-        #     Create(greyedEdges['sb']),
-        #     FadeIn(discoveredPathKey.key),
-        # )
-        # self.wait()
         
-        addCitiesAnims = discoveredList.addCities(
+        addCitiesAnims = [] 
+        discoveredList.addCities(
             [
                 ListCity("A", "S", 4),
                 ListCity("B", "S", 2),
@@ -319,10 +338,23 @@ class DijkstrasLogic(ZoomedScene):
             GrowFromCenter(cityLabels['a']),
             LaggedStart(Create(greyedEdges['sa']), FadeIn(greyedWeights['sa'])),
             LaggedStart(Create(greyedEdges['sb']), FadeIn(greyedWeights['sb'])),
-            # Create(greyedEdges['sb']),
             FadeIn(discoveredPathKey.key),
+            discoveredList.cityNameMobjects[0].animate.set_opacity(1).shift(UP*0.3),
+            discoveredList.cityNameMobjects[1].animate.set_opacity(1).shift(UP*0.3),
         ]
-        self.playAnimsFromList(addCitiesAnims,concurrent=True)
+        self.play(*addCitiesAnims)
+        # self.playAnimsFromList(addCitiesAnims,concurrent=True)
+        self.wait()
+        discoveredList.cityDistanceMobjects[0].set_opacity(1).shift(UP*0.3)
+        discoveredList.cityDistanceMobjects[1].set_opacity(1).shift(UP*0.3)
+
+        self.play(
+            TransformFromCopy(greyedWeights['sa'],  discoveredList.cityDistanceMobjects[0]),
+        )
+        self.wait()
+        self.play(
+            TransformFromCopy(greyedWeights['sb'],  discoveredList.cityDistanceMobjects[1]),
+        )
         self.wait()
 
         
@@ -334,7 +366,7 @@ class DijkstrasLogic(ZoomedScene):
             FadeIn(estimatedShortestPath.key)
         ]
         self.playAnimsFromList(estimateAnims, concurrent=True)
-        self.wait()
+        self.wait(2)
         
         sortAnims = discoveredList.sortList()
         self.playAnimsFromList(sortAnims, concurrent=True)

@@ -26,8 +26,8 @@ positions = {
     "n": LEFT*-0.1+UP*0.6,
     "o": LEFT*-0.0+UP*-0.4,
     "p": LEFT*-0.5+UP*-0.05,
-    # "q": LEFT*4.1+UP*1.3,
-    # "r": LEFT*3.85+UP*1.6,
+    "q": LEFT*4.1+UP*1.3,
+    "r": LEFT*3.85+UP*1.6,
     "t": LEFT*-0.93+UP*0.47,
 }
 
@@ -49,8 +49,8 @@ labelDirections = {
     "n": LEFT+UP,
     "o": LEFT,
     "p": DOWN,
-    # "q": LEFT, 
-    # "r": LEFT,
+    "q": LEFT, 
+    "r": LEFT,
     "t": RIGHT, 
 }
 
@@ -73,8 +73,8 @@ adjLists = {
     "n": ["i", "j", "p", "t"],
     "o": ["f", "j"],
     "p": ["n", "t"], 
-    # "q": [ "s"], 
-    # "r": ["s"],
+    "q": [ "s"], 
+    "r": ["s"],
     "t": ["n", "p"] 
 }
 
@@ -99,8 +99,8 @@ pathWeights = {
     "n": [3, 4, 1, 2],
     "o": [9, 8],
     "p": [1, 2], 
-    # "q": [1], 
-    # "r": [1],
+    "q": [1], 
+    "r": [1],
     "t": [2, 2] 
 }
 
@@ -123,8 +123,8 @@ weightDirections = {
     "n": [LEFT, UP, DOWN+LEFT, UP],
     "o": [LEFT+DOWN, RIGHT],
     "p": [DOWN+LEFT, RIGHT], 
-    # "q": [LEFT+DOWN], 
-    # "r": [RIGHT],
+    "q": [LEFT+DOWN], 
+    "r": [RIGHT],
     "t": [UP, RIGHT] 
 }
 

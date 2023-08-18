@@ -16,13 +16,18 @@ dashedEdgeColorEstimated = BLUE
 dotRadius = 0.05
 
 
-def getDijkstrasMapCitiesAndLabels(altPositions=None):
+def getDijkstrasMapCitiesAndLabels(altPositions=None, altCityList=None):
     mapCities = {}
     cityLabels = {}
+    citiesToUse = cities
     positionsToUse = positions
+    
     if altPositions != None:
         positionsToUse = altPositions
-    for city in cities:
+    if altCityList != None:
+        citiesToUse = altCityList
+
+    for city in citiesToUse:
         mapCities[city] = Dot(
                             radius=dotRadius, 
                             point=positionsToUse[city], 
@@ -37,7 +42,7 @@ def getDijkstrasMapCitiesAndLabels(altPositions=None):
         
     return mapCities, cityLabels
 
-def getDijkstrasEdgeAndWeightMobjects(mapCities):
+def getDijkstrasEdgeAndWeightMobjects(mapCities, altCitiesList=None):
     edges = {}
     greyedEdges = {}
     estimatedShortestPathEdges ={}
